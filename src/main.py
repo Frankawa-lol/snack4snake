@@ -5,16 +5,16 @@ pygame.init()
 screen = pygame.display.set_mode((256, 256))
 clock = pygame.time.Clock()
 running = True
-text = pygame.font.Font(size=50)
 
 color_bg = pygame.Color(223, 175, 255)
 color_snake = pygame.Color(175, 255, 223)
 color_item = pygame.Color(255, 223, 175)
 
-deathscreen = text.render("You Died!", True, "black", color_item)
+deathscreen = pygame.font.Font(None, size=50).render("You Died!", True, "black", color_item)
 
 pos_snake = [(120, 120), (120, 136), (120, 152), (136, 152), (152, 152), (152, 168)]
 alive = True
+score = 0
 
 def generate_new_food():
     valid_food_pos = True
@@ -76,6 +76,7 @@ while running:
             if pos_snake[0] == e:
                 food_eaten = True
                 pos_food.remove(e)
+                score += 1
                 if len(pos_snake) < 253:
                     generate_new_food()
 
@@ -100,6 +101,7 @@ while running:
         screen.fill(color_item)
         screen.blit(deathscreen, (128 - 79, 128 - 17))
 
+    screen.blit(pygame.font.Font(None, 30).render(str(score), True, "black"), (0, 0))
 
     pygame.display.flip()
 
