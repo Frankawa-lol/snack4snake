@@ -3,6 +3,7 @@ import random
 
 pygame.init()
 screen = pygame.display.set_mode((256, 256))
+pygame.display.set_caption("snack4snake")
 clock = pygame.time.Clock()
 running = True
 
