@@ -1,4 +1,5 @@
 import pygame
+import random
 
 pygame.init()
 screen = pygame.display.set_mode((256, 256))
@@ -10,6 +11,24 @@ color_snake = pygame.Color(0xff, 0xdf, 0xaf)
 color_item = pygame.Color(0xaf, 0xff, 0xdf)
 
 pos_snake = [(120, 120), (120, 136), (120, 152), (136, 152), (152, 152)]
+
+def generate_new_food():
+    valid_food_pos = True
+    food = (random.randint(0, 15) * 16 + 8, random.randint(0, 15)* 16 + 8)
+    for e in pos_snake:
+        if food == e:
+            valid_food_pos = False
+    if valid_food_pos:
+        pos_food.append(food)
+    else:
+        generate_new_food()
+
+pos_food = []
+for i in range(4):
+    generate_new_food()
+
+
+food_eaten = False
 
 current_dir = "up"
 
@@ -27,7 +46,7 @@ while running:
         current_dir = "left"
     if keys[pygame.K_RIGHT] and current_dir != "left":
         current_dir = "right"
-    
+
     match current_dir:
         case "up":
             pos_snake.insert(0, (pos_snake[0][0], pos_snake[0][1] - 16))
@@ -47,10 +66,23 @@ while running:
     if pos_snake[0][1] < 8:
         pos_snake[0] = (pos_snake[0][0], 248)
     print(pos_snake[0])
-    pos_snake.pop()
+
+    for e in pos_food:
+        if pos_snake[0] == e:
+            food_eaten = True
+            pos_food.remove(e)
+            if len(pos_snake) < 253:
+                generate_new_food()
+
+    if not food_eaten:
+        pos_snake.pop()
+
+    food_eaten = False
 
     screen.fill(color_bg)
     pygame.draw.circle(screen, color_snake, pos_snake[0], 8)
+    for e in pos_food:
+        pygame.draw.circle(screen, color_item, e, 8)
     for e in pos_snake:
         if pos_snake.index(e) == 0:
             continue
