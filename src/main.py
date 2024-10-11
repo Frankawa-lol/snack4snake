@@ -105,4 +105,4 @@ while running:
 
     pygame.display.flip()
 
-    clock.tick(10)
+    clock.tick(7)
