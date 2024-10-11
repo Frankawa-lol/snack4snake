@@ -87,10 +87,12 @@ while running:
         screen.fill(color_bg)
         for e in pos_food:
             pygame.draw.circle(screen, color_item, e, 8)
-            for e in pos_snake:
-                if pos_snake.index(e) == 0:
-                    continue
-                pygame.draw.rect(screen, color_snake, (e[0]-8, e[1]-8, 16, 16))
+        
+        for e in pos_snake:
+            if pos_snake.index(e) == 0:
+                continue
+            pygame.draw.rect(screen, color_snake, (e[0]-8, e[1]-8, 16, 16))
+        
         pygame.draw.circle(screen, color_snake, pos_snake[0], 8)
         if pos_snake[0] in pos_snake[1:]:
             alive = False
