@@ -7,10 +7,6 @@ color_bg = pygame.Color(223, 175, 255)
 color_snake = pygame.Color(175, 255, 223)
 color_item = pygame.Color(255, 223, 175)
 
-pygame.init()
-
-deathscreen = pygame.font.Font(None, size=50).render("You Died!", True, "black", color_item)
-
 class SnakeEnv(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 7}
 
@@ -27,6 +23,8 @@ class SnakeEnv(gym.Env):
         self.current_dir = "up"
         self.render_mode = render_mode
         if render_mode == "human":
+            pygame.init()
+            self.deathscreen = pygame.font.Font(None, size=50).render("You Died!", True, "black", color_item)
             self.screen = pygame.display.set_mode((256, 256))
             pygame.display.set_caption("snack4snake")
             self.clock = pygame.time.Clock()
@@ -105,10 +103,13 @@ class SnakeEnv(gym.Env):
         return self._get_obs(), reward, not self.alive, False, self._get_info()
 
     def _get_obs(self):
+        print(self.pos_snake, self.pos_food)
         return [
-            self.pos_snake[0],
-            self.pos_food,
-            self.pos_snake[1:253]
+            self.pos_snake[0][0],
+            self.pos_snake[0][1],
+            self.pos_food[0][0],
+            self.pos_food[0][1],
+            len(self.pos_snake[1])
         ]
 
     def _get_info(self):
@@ -130,7 +131,7 @@ class SnakeEnv(gym.Env):
                 self.alive = False
         else:
             self.screen.fill(color_item)
-            self.screen.blit(deathscreen, (128 - 79, 128 - 17))
+            self.screen.blit(self.deathscreen, (128 - 79, 128 - 17))
 
         self.screen.blit(pygame.font.Font(None, 30).render(str(self.score), True, "black"), (0, 0))
 
@@ -139,4 +140,7 @@ class SnakeEnv(gym.Env):
         self.clock.tick(7)
 
 gym.register("libewa/snack4snake-v0", entry_point=SnakeEnv)
-gym.pprint_registry()
+if __name__ == "__main__":
+    gym.pprint_registry()
+    env = SnakeEnv()
+    print(env.reset()[0])
