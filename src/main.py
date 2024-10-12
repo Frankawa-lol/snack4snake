@@ -13,6 +13,13 @@ color_item = pygame.Color(255, 223, 175)
 
 deathscreen = pygame.font.Font(None, size=50).render("You Died!", True, "black", color_item)
 
+moves = {
+    "left": 0,
+    "right": 1,
+    "up": 2,
+    "down": 3
+}
+
 env = SnakeEnv()
 
 while running:
@@ -24,12 +31,14 @@ while running:
     if env.alive:
         if keys[pygame.K_UP]:
             env.step(2)
-        if keys[pygame.K_DOWN]:
+        elif keys[pygame.K_DOWN]:
             env.step(3)
-        if keys[pygame.K_LEFT]:
+        elif keys[pygame.K_LEFT]:
             env.step(0)
-        if keys[pygame.K_RIGHT]:
+        elif keys[pygame.K_RIGHT]:
             env.step(1)
+        else:
+            env.step(moves[env.current_dir])
         screen.fill(color_bg)
         for e in env.pos_food:
             pygame.draw.circle(screen, color_item, e, 8)
