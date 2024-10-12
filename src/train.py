@@ -1,12 +1,9 @@
-from numpy.lib.format import BUFFER_SIZE
-
 from logic import SnakeEnv
 import os
 from datetime import datetime
 import numpy as np
 from stable_baselines3 import DQN
 from stable_baselines3.common.callbacks import BaseCallback, CheckpointCallback
-from stable_baselines3.common.logger import TensorBoardOutputFormat
 
 TIMESTEPS = 80_000
 LEARNING_RATE = 3e-4
