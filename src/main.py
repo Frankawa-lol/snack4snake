@@ -12,7 +12,7 @@ moves = {
 
 pygame.init()
 
-env = SnakeEnv(render_mode="human")
+env = SnakeEnv(render_mode="human", fps=7)
 
 while running:
     for event in pygame.event.get():

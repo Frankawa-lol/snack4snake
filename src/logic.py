@@ -8,19 +8,20 @@ color_snake = pygame.Color(175, 255, 223)
 color_item = pygame.Color(255, 223, 175)
 
 class SnakeEnv(gym.Env):
-    metadata = {"render_modes": ["human"], "render_fps": 7}
+    metadata = {"render_modes": ["human"], "render_fps": 2000}
 
     action_space = gym.spaces.Discrete(4)
     observation_space = gym.spaces.Box(low=0, high=15,
                                        shape=(11,), dtype=np.int32)
 
-    def __init__(self, render_mode=None):
+    def __init__(self, render_mode=None, fps=2**32-1):
         super(SnakeEnv, self).__init__()
         self.pos_snake = [(120, 120), (120, 136), (120, 152), (136, 152), (152, 152), (152, 168)]
         self.alive = True
         self.score = 0
         self.pos_food = []
         self.current_dir = "up"
+        self.fps = fps
         self.render_mode = "human"
         if render_mode == "human":
             pygame.init()
@@ -143,7 +144,7 @@ class SnakeEnv(gym.Env):
 
         pygame.display.flip()
 
-        self.clock.tick(7)
+        self.clock.tick(self.fps)
 
 gym.register("libewa/snack4snake-v0", entry_point=SnakeEnv)
 if __name__ == "__main__":

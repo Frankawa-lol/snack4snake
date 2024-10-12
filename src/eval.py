@@ -15,7 +15,7 @@ model = DQN.load(model_path)
 num_episodes = 100
 
 # Ausführung
-eval_env = SnakeEnv(render_mode="human")
+eval_env = SnakeEnv(render_mode="human", fps=10)
 obs, _ = eval_env.reset()
 
 for _ in range(num_episodes):
