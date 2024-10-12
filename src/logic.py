@@ -12,7 +12,7 @@ class SnakeEnv(gym.Env):
 
     action_space = gym.spaces.Discrete(4)
     observation_space = gym.spaces.Box(low=0, high=15,
-                                       shape=(5,), dtype=np.int32)
+                                       shape=(11,), dtype=np.int32)
 
     def __init__(self, render_mode=None):
         super(SnakeEnv, self).__init__()
@@ -21,7 +21,7 @@ class SnakeEnv(gym.Env):
         self.score = 0
         self.pos_food = []
         self.current_dir = "up"
-        self.render_mode = render_mode
+        self.render_mode = "human"
         if render_mode == "human":
             pygame.init()
             self.deathscreen = pygame.font.Font(None, size=50).render("You Died!", True, "black", color_item)
@@ -103,13 +103,19 @@ class SnakeEnv(gym.Env):
         return self._get_obs(), reward, not self.alive, False, self._get_info()
 
     def _get_obs(self):
-        print(self.pos_snake, self.pos_food)
+        #print(self.pos_snake, self.pos_food)
         return [
             self.pos_snake[0][0],
             self.pos_snake[0][1],
             self.pos_food[0][0],
             self.pos_food[0][1],
-            len(self.pos_snake[1])
+            self.pos_food[1][0],
+            self.pos_food[1][1],
+            self.pos_food[2][0],
+            self.pos_food[2][1],
+            self.pos_food[3][0],
+            self.pos_food[3][1],
+            len(self.pos_snake[1:])
         ]
 
     def _get_info(self):
