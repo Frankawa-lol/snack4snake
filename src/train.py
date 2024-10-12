@@ -1,9 +1,17 @@
+import argparse
 from logic import SnakeEnv
 import os
 from datetime import datetime
 import numpy as np
 from stable_baselines3 import DQN
 from stable_baselines3.common.callbacks import BaseCallback, CheckpointCallback
+
+parser = argparse.ArgumentParser(
+                    prog='snack4snake train',
+                    description='Train snack4snake AI models')
+parser.add_argument('-r', '--render', action='store_true')
+
+human = parser.parse_args().render
 
 TIMESTEPS = 80_000
 LEARNING_RATE = 3e-4
@@ -25,7 +33,7 @@ def safe_mean(arr):
     return np.nan if len(arr) == 0 else np.mean(arr)
 
 # Training
-env = SnakeEnv(render_mode="human")
+env = SnakeEnv(render_mode="human" if human else None)
 
 current_time = datetime.now()
 
@@ -59,6 +67,7 @@ try:
     model.learn(
         total_timesteps=TIMESTEPS,
         callback=[checkpoint_callback],
+        progress_bar=True
     )
 except KeyboardInterrupt:
     print("Training interrupted by user")

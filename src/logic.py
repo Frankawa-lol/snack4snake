@@ -22,7 +22,7 @@ class SnakeEnv(gym.Env):
         self.pos_food = []
         self.current_dir = "up"
         self.fps = fps
-        self.render_mode = "human"
+        self.render_mode = render_mode
         if render_mode == "human":
             pygame.init()
             self.deathscreen = pygame.font.Font(None, size=50).render("You Died!", True, "black", color_item)
@@ -34,9 +34,18 @@ class SnakeEnv(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.__init__()
+        self.pos_snake = [(120, 120), (120, 136), (120, 152), (136, 152), (152, 152), (152, 168)]
+        self.alive = True
+        self.score = 0
+        self.pos_food = []
+        self.current_dir = "up"
+
+        for i in range(4):
+            self.generate_new_food()
+
         if self.render_mode == "human":
             self._render_frame()
+
         return self._get_obs(), self._get_info()
 
     def generate_new_food(self):
@@ -91,9 +100,9 @@ class SnakeEnv(gym.Env):
 
         if not food_eaten:
             self.pos_snake.pop()
-            reward = -0.1
+            reward = -1
         else:
-            reward = 1
+            reward = 2
 
         if not self.alive:
             reward = -6e23
@@ -139,6 +148,7 @@ class SnakeEnv(gym.Env):
         return { "score": self.score }
 
     def _render_frame(self):
+        if self.render_mode is None: return
         if self.alive:
             self.screen.fill(color_bg)
             for e in self.pos_food:
