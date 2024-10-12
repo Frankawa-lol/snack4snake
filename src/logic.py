@@ -12,7 +12,7 @@ class SnakeEnv(gym.Env):
 
     action_space = gym.spaces.Discrete(4)
     observation_space = gym.spaces.Box(low=0, high=15,
-                                       shape=(11,), dtype=np.int32)
+                                       shape=(256,), dtype=np.int32)
 
     def __init__(self, render_mode=None, fps=2**32-1):
         super(SnakeEnv, self).__init__()
@@ -105,18 +105,34 @@ class SnakeEnv(gym.Env):
 
     def _get_obs(self):
         #print(self.pos_snake, self.pos_food)
+        field = [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+        for x in range(16):
+            for y in range(16):
+                if (x, y) == self.pos_snake[0]:
+                    field[x][y] = 1
+                elif (x, y) in self.pos_snake[1:]:
+                    field[x][y] = 2
+                elif (x, y) in self.pos_food:
+                    field[x][y] = 3
         return [
-            self.pos_snake[0][0],
-            self.pos_snake[0][1],
-            self.pos_food[0][0],
-            self.pos_food[0][1],
-            self.pos_food[1][0],
-            self.pos_food[1][1],
-            self.pos_food[2][0],
-            self.pos_food[2][1],
-            self.pos_food[3][0],
-            self.pos_food[3][1],
-            len(self.pos_snake[1:])
+            x for row in field for x in row
         ]
 
     def _get_info(self):
