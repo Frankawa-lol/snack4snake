@@ -8,7 +8,7 @@ color_snake = pygame.Color(175, 255, 223)
 color_item = pygame.Color(255, 223, 175)
 
 class SnakeEnv(gym.Env):
-    metadata = {"render_modes": ["human"], "render_fps": 2000}
+    metadata = {"render_modes": ["human"], "render_fps": 2**32-1}
 
     action_space = gym.spaces.Discrete(4)
     observation_space = gym.spaces.Box(low=0, high=15,
@@ -60,14 +60,19 @@ class SnakeEnv(gym.Env):
             self.generate_new_food()
 
     def step(self, action):
+        reward = 0
         food_eaten = False
         if action == 2 and self.current_dir != "down":
+            reward += 0.5
             self.current_dir = "up"
         if action == 3 and self.current_dir != "up":
+            reward += 0.5
             self.current_dir = "down"
         if action == 0 and self.current_dir != "right":
+            reward += 0.5
             self.current_dir = "left"
         if action == 1 and self.current_dir != "left":
+            reward += 0.5
             self.current_dir = "right"
 
         match self.current_dir:
@@ -100,12 +105,12 @@ class SnakeEnv(gym.Env):
 
         if not food_eaten:
             self.pos_snake.pop()
-            reward = -1
+            reward += -3
         else:
-            reward = 2
+            reward += 10
 
         if not self.alive:
-            reward = -6e23
+            reward = -1000
 
         if self.render_mode == "human":
             self._render_frame()

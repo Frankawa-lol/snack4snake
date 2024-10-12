@@ -13,18 +13,18 @@ parser.add_argument('-r', '--render', action='store_true')
 
 human = parser.parse_args().render
 
-TIMESTEPS = 80_000
+TIMESTEPS = 20_000
 LEARNING_RATE = 3e-4
-γ = 0.99
-EXPLORATION_FRACTION = 0.1
+gamma = 0.99
+EXPLORATION_FRACTION = 0.6
 EXPLORATION_INITIAL_EPS = 1.0
-EXPLORATION_FINAL_EPS = 0.05
+EXPLORATION_FINAL_EPS = 0.2
 BUFFER_SIZE = 100_000
 LEARNING_START = 1000
 BATCH_SIZE = 100
 
 TARGET_UPDATE_INTERVAL = 1000
-τ = 1.0
+tau = 1.0
 TRAIN_FREQ = 4
 GRADIENT_STEPS = 1
 
@@ -51,8 +51,8 @@ model = DQN('MlpPolicy', env,
             buffer_size=BUFFER_SIZE,
             learning_starts=LEARNING_START,
             batch_size=BATCH_SIZE,
-            tau=τ,
-            gamma=γ,
+            tau=tau,
+            gamma=gamma,
             train_freq=TRAIN_FREQ,
             gradient_steps=GRADIENT_STEPS,
             target_update_interval=TARGET_UPDATE_INTERVAL,
