@@ -5,10 +5,10 @@ import pygame
 import os
 
 
-snake_head_image = pygame.image.load(os.path.join('src/sprite', 'snake_head.png'))
-snake_body_image = pygame.image.load(os.path.join('src/sprite', 'snake_body.png'))
-snake_corner_image = pygame.image.load(os.path.join('src/sprite', 'snake_corner.png'))
-snake_tail_image = pygame.image.load(os.path.join('src/sprite', 'snake_tail.png'))
+snake_head_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_head.png'))
+snake_body_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_body.png'))
+snake_corner_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_corner.png'))
+snake_tail_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_tail.png'))
 screen = pygame.display.set_mode((256, 256))
 
 pygame.init()
