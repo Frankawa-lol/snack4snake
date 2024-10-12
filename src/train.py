@@ -13,12 +13,12 @@ parser.add_argument('-r', '--render', action='store_true')
 
 human = parser.parse_args().render
 
-TIMESTEPS = 20_000
-LEARNING_RATE = 3e-4
+TIMESTEPS = 100_000
+LEARNING_RATE = 1e-4
 gamma = 0.99
-EXPLORATION_FRACTION = 0.6
+EXPLORATION_FRACTION = 0.8
 EXPLORATION_INITIAL_EPS = 1.0
-EXPLORATION_FINAL_EPS = 0.2
+EXPLORATION_FINAL_EPS = 0.05
 BUFFER_SIZE = 100_000
 LEARNING_START = 1000
 BATCH_SIZE = 100
@@ -46,6 +46,24 @@ log_dir = f"logs/{formatted_time}/"
 os.makedirs(models_dir, exist_ok=True)
 os.makedirs(log_dir, exist_ok=True)
 
+
+class TensorboardCallback(BaseCallback):
+    def __init__(self, verbose=0):
+        super(TensorboardCallback, self).__init__(verbose)
+
+    def _on_step(self) -> bool:
+        # Log epsilon (exploration rate)
+        self.logger.record('epsilon', self.model.exploration_rate)
+
+        # Log Q-values
+        obs = self.training_env.reset()[0]
+        q_values = self.model.q_net(self.model.q_net.obs_to_tensor(obs)[0])
+        self.logger.record('q_values/max', q_values.max().item())
+        self.logger.record('q_values/min', q_values.min().item())
+        self.logger.record('q_values/mean', q_values.mean().item())
+
+        return True
+
 model = DQN('MlpPolicy', env,
             learning_rate=LEARNING_RATE,
             buffer_size=BUFFER_SIZE,
@@ -59,6 +77,7 @@ model = DQN('MlpPolicy', env,
             exploration_fraction=EXPLORATION_FRACTION,
             exploration_initial_eps=EXPLORATION_INITIAL_EPS,
             exploration_final_eps=EXPLORATION_FINAL_EPS,
+            tensorboard_log=log_dir,
             verbose=1)
 
 checkpoint_callback = CheckpointCallback(save_freq=1000, save_path=models_dir, name_prefix='dqn_snake')
@@ -66,7 +85,7 @@ checkpoint_callback = CheckpointCallback(save_freq=1000, save_path=models_dir, n
 try:
     model.learn(
         total_timesteps=TIMESTEPS,
-        callback=[checkpoint_callback],
+        callback=[checkpoint_callback, TensorboardCallback()],
         progress_bar=True
     )
 except KeyboardInterrupt:

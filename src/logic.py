@@ -4,13 +4,11 @@ import numpy as np
 import pygame
 import os
 
-
 snake_head_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_head.png'))
 snake_body_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_body.png'))
 snake_corner_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_corner.png'))
 snake_tail_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_tail.png'))
-screen = pygame.display.set_mode((256, 256))
-
+screen = None
 pygame.init()
 
 class SnakeEnv(gym.Env):
@@ -20,6 +18,20 @@ class SnakeEnv(gym.Env):
     observation_space = gym.spaces.Box(low=0, high=15,
                                        shape=(256,), dtype=np.int32)
     class SnakePart:
+        def draw_rotated_image(self, image, direction, position):
+            match direction:
+                case "up":
+                    angle = 0
+                case "left":
+                    angle = 90
+                case "down":
+                    angle = 180
+                case "right":
+                    angle = 270
+                case _:
+                    angle = 0
+            new_image = pygame.transform.rotate(image, angle)
+            screen.blit(new_image, position)
         def __init__(self, direction, position, snake_type, last_direction=None):
             self.direction = direction
             self.position = position
@@ -33,25 +45,26 @@ class SnakeEnv(gym.Env):
         def draw(self):
             match self.snake_type:
                 case "head":
-                    SnakeEnv.draw_rotated_image(SnakeEnv, snake_head_image, self.direction, self.position)
+                    self.draw_rotated_image(snake_head_image, self.direction, self.position)
                 case "body":
-                    SnakeEnv.draw_rotated_image(SnakeEnv, snake_body_image, self.direction, self.position)
+                    self.draw_rotated_image(snake_body_image, self.direction, self.position)
                 case "corner":
                     if {self.last_direction, self.direction} == {"up", "left"}:
-                        SnakeEnv.draw_rotated_image(SnakeEnv, snake_corner_image, "up", self.position)
+                        self.draw_rotated_image(snake_corner_image, "up", self.position)
                     elif {self.last_direction, self.direction} == {"left", "down"}:
-                        SnakeEnv.draw_rotated_image(SnakeEnv, snake_corner_image, "left", self.position)
+                        self.draw_rotated_image(snake_corner_image, "left", self.position)
                     elif {self.last_direction, self.direction} == {"down", "right"}:
-                        SnakeEnv.draw_rotated_image(SnakeEnv, snake_corner_image, "down", self.position)
+                        self.draw_rotated_image(snake_corner_image, "down", self.position)
                     elif {self.last_direction, self.direction} == {"right", "up"}:
-                        SnakeEnv.draw_rotated_image(SnakeEnv, snake_corner_image, "right", self.position)
+                        self.draw_rotated_image(snake_corner_image, "right", self.position)
                     else:
                         print("no possible corner")
                 case "tail":
-                    SnakeEnv.draw_rotated_image(SnakeEnv, snake_tail_image, self.direction, self.position)
+                    self.draw_rotated_image(snake_tail_image, self.direction, self.position)
 
     def __init__(self, render_mode=None, fps=2**32-1):
         super(SnakeEnv, self).__init__()
+        self.last_reward = 0
         self.pos_snake = [self.SnakePart("up", (112, 112), "head"),
                           self.SnakePart("up", (112, 128), "body"),
                           self.SnakePart("up", (112, 144), "corner", "right"),
@@ -65,7 +78,8 @@ class SnakeEnv(gym.Env):
         self.fps = fps
         self.render_mode = render_mode
         if render_mode == "human":
-            
+            global screen
+            screen = pygame.display.set_mode((256, 256))
             pygame.display.set_caption("snack4snake")
             self.clock = pygame.time.Clock()
             
@@ -112,17 +126,15 @@ class SnakeEnv(gym.Env):
         reward = 0
         food_eaten = False
         if action == 2 and self.current_dir != "down":
-            reward += 0.5
             self.current_dir = "up"
-        if action == 3 and self.current_dir != "up":
-            reward += 0.5
+        elif action == 3 and self.current_dir != "up":
             self.current_dir = "down"
-        if action == 0 and self.current_dir != "right":
-            reward += 0.5
+        elif action == 0 and self.current_dir != "right":
             self.current_dir = "left"
-        if action == 1 and self.current_dir != "left":
-            reward += 0.5
+        elif action == 1 and self.current_dir != "left":
             self.current_dir = "right"
+        else:
+            reward += -1
 
         match self.current_dir:
             case "up":
@@ -160,13 +172,15 @@ class SnakeEnv(gym.Env):
             self.pos_snake.pop()
             reward += -3
         else:
-            reward += 10
+            reward += 20
 
         if not self.alive:
             reward = -1
 
         if self.render_mode == "human":
             self._render_frame()
+
+        self.last_reward = reward
 
         return self._get_obs(), reward, not self.alive, False, self._get_info()
 
@@ -206,7 +220,7 @@ class SnakeEnv(gym.Env):
         ]
 
     def _get_info(self):
-        return { "score": self.score }
+        return { "score": self.score, "reward": self.last_reward }
 
     def _render_frame(self):
         if self.render_mode is None: return
@@ -237,20 +251,7 @@ class SnakeEnv(gym.Env):
         pygame.display.flip()
 
         self.clock.tick(self.fps)
-    def draw_rotated_image(self, image, direction, position):
-        match direction:
-            case "up":
-                angle = 0
-            case "left":
-                angle = 90
-            case "down":
-                angle = 180
-            case "right":
-                angle = 270
-            case _:
-                angle = 0
-        new_image = pygame.transform.rotate(image, angle)
-        screen.blit(new_image, position)
+
     def flip_direction(self, direction):
         match direction:
             case "up":
