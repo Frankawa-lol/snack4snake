@@ -1,15 +1,44 @@
 import random
+import gymnasium as gym
+import numpy as np
+import pygame
 
-class SnakeEnv:
-    pos_snake = [(120, 120), (120, 136), (120, 152), (136, 152), (152, 152), (152, 168)]
-    alive = True
-    score = 0
-    pos_food = []
-    current_dir = "up"
+color_bg = pygame.Color(223, 175, 255)
+color_snake = pygame.Color(175, 255, 223)
+color_item = pygame.Color(255, 223, 175)
 
-    def __init__(self):
+pygame.init()
+
+deathscreen = pygame.font.Font(None, size=50).render("You Died!", True, "black", color_item)
+
+class SnakeEnv(gym.Env):
+    metadata = {"render_modes": ["human"], "render_fps": 7}
+
+    action_space = gym.spaces.Discrete(4)
+    observation_space = gym.spaces.Box(low=0, high=15,
+                                       shape=(5,), dtype=np.int32)
+
+    def __init__(self, render_mode=None):
+        super(SnakeEnv, self).__init__()
+        self.pos_snake = [(120, 120), (120, 136), (120, 152), (136, 152), (152, 152), (152, 168)]
+        self.alive = True
+        self.score = 0
+        self.pos_food = []
+        self.current_dir = "up"
+        self.render_mode = render_mode
+        if render_mode == "human":
+            self.screen = pygame.display.set_mode((256, 256))
+            pygame.display.set_caption("snack4snake")
+            self.clock = pygame.time.Clock()
         for i in range(4):
             self.generate_new_food()
+
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
+        self.__init__()
+        if self.render_mode == "human":
+            self._render_frame()
+        return self._get_obs(), self._get_info()
 
     def generate_new_food(self):
         valid_food_pos = True
@@ -63,5 +92,51 @@ class SnakeEnv:
 
         if not food_eaten:
             self.pos_snake.pop()
+            reward = -0.1
+        else:
+            reward = 1
 
-        food_eaten = False
+        if not self.alive:
+            reward = -6e23
+
+        if self.render_mode == "human":
+            self._render_frame()
+
+        return self._get_obs(), reward, not self.alive, False, self._get_info()
+
+    def _get_obs(self):
+        return [
+            self.pos_snake[0],
+            self.pos_food,
+            self.pos_snake[1:253]
+        ]
+
+    def _get_info(self):
+        return { "score": self.score }
+
+    def _render_frame(self):
+        if self.alive:
+            self.screen.fill(color_bg)
+            for e in self.pos_food:
+                pygame.draw.circle(self.screen, color_item, e, 8)
+
+            for e in self.pos_snake:
+                if self.pos_snake.index(e) == 0:
+                    continue
+                pygame.draw.rect(self.screen, color_snake, (e[0] - 8, e[1] - 8, 16, 16))
+
+            pygame.draw.circle(self.screen, color_snake, self.pos_snake[0], 8)
+            if self.pos_snake[0] in self.pos_snake[1:]:
+                self.alive = False
+        else:
+            self.screen.fill(color_item)
+            self.screen.blit(deathscreen, (128 - 79, 128 - 17))
+
+        self.screen.blit(pygame.font.Font(None, 30).render(str(self.score), True, "black"), (0, 0))
+
+        pygame.display.flip()
+
+        self.clock.tick(7)
+
+gym.register("libewa/snack4snake-v0", entry_point=SnakeEnv)
+gym.pprint_registry()

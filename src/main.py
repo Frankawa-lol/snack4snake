@@ -1,17 +1,7 @@
 import pygame
 from logic import SnakeEnv
 
-pygame.init()
-screen = pygame.display.set_mode((256, 256))
-pygame.display.set_caption("snack4snake")
-clock = pygame.time.Clock()
 running = True
-
-color_bg = pygame.Color(223, 175, 255)
-color_snake = pygame.Color(175, 255, 223)
-color_item = pygame.Color(255, 223, 175)
-
-deathscreen = pygame.font.Font(None, size=50).render("You Died!", True, "black", color_item)
 
 moves = {
     "left": 0,
@@ -20,7 +10,9 @@ moves = {
     "down": 3
 }
 
-env = SnakeEnv()
+pygame.init()
+
+env = SnakeEnv(render_mode="human")
 
 while running:
     for event in pygame.event.get():
@@ -39,24 +31,3 @@ while running:
             env.step(1)
         else:
             env.step(moves[env.current_dir])
-        screen.fill(color_bg)
-        for e in env.pos_food:
-            pygame.draw.circle(screen, color_item, e, 8)
-        
-        for e in env.pos_snake:
-            if env.pos_snake.index(e) == 0:
-                continue
-            pygame.draw.rect(screen, color_snake, (e[0]-8, e[1]-8, 16, 16))
-        
-        pygame.draw.circle(screen, color_snake, env.pos_snake[0], 8)
-        if env.pos_snake[0] in env.pos_snake[1:]:
-            env.alive = False
-    else:
-        screen.fill(color_item)
-        screen.blit(deathscreen, (128 - 79, 128 - 17))
-
-    screen.blit(pygame.font.Font(None, 30).render(str(env.score), True, "black"), (0, 0))
-
-    pygame.display.flip()
-
-    clock.tick(7)
