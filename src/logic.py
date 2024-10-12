@@ -5,10 +5,10 @@ import pygame
 import os
 
 
-snake_head_image = pygame.image.load(os.path.join('sprite', 'snake_head.png'))
-snake_body_image = pygame.image.load(os.path.join('sprite', 'snake_body.png'))
-snake_corner_image = pygame.image.load(os.path.join('sprite', 'snake_corner.png'))
-snake_tail_image = pygame.image.load(os.path.join('sprite', 'snake_tail.png'))
+snake_head_image = pygame.image.load(os.path.join('src/sprite', 'snake_head.png'))
+snake_body_image = pygame.image.load(os.path.join('src/sprite', 'snake_body.png'))
+snake_corner_image = pygame.image.load(os.path.join('src/sprite', 'snake_corner.png'))
+snake_tail_image = pygame.image.load(os.path.join('src/sprite', 'snake_tail.png'))
 screen = pygame.display.set_mode((256, 256))
 
 pygame.init()
@@ -78,7 +78,12 @@ class SnakeEnv(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.pos_snake = [(120, 120), (120, 136), (120, 152), (136, 152), (152, 152), (152, 168)]
+        self.pos_snake = [self.SnakePart("up", (112, 112), "head"),
+                          self.SnakePart("up", (112, 128), "body"),
+                          self.SnakePart("up", (112, 144), "corner", "right"),
+                          self.SnakePart("left", (128, 144), "body"),
+                          self.SnakePart("left", (144, 144), "corner", "down"),
+                          self.SnakePart("up", (144, 160), "tail")]
         self.alive = True
         self.score = 0
         self.pos_food = []
