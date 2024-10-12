@@ -110,7 +110,7 @@ class SnakeEnv(gym.Env):
             reward += 10
 
         if not self.alive:
-            reward = -1000
+            reward = -1
 
         if self.render_mode == "human":
             self._render_frame()
