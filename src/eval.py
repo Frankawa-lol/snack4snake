@@ -1,9 +1,15 @@
 from logic import SnakeEnv
 from stable_baselines3 import DQN
+import argparse
 
+parser = argparse.ArgumentParser(
+                    prog='snack4snake eval',
+                    description='Runs snack4snake AI models')
+parser.add_argument('model_path')
 
-model = DQN.load("models/DQN_Snake_final")
-
+# Pfad zum Modell
+model_path = parser.parse_args().model_path
+model = DQN.load(model_path)
 
 num_episodes = 400
 

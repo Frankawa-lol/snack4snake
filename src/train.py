@@ -1,7 +1,7 @@
 import argparse
+import shutil
 
 from stable_baselines3.common.logger import TensorBoardOutputFormat
-
 from logic import SnakeEnv
 import os
 from datetime import datetime
@@ -38,8 +38,12 @@ def safe_mean(arr):
 # Training
 env = SnakeEnv(render_mode="human" if human else None)
 
-models_dir = f"models/"
-log_dir = f"logs/"
+current_time = datetime.now()
+# Format datetime for file names
+formatted_time = current_time.strftime("%Y-%m-%d_%H-%M")
+
+models_dir = f"models/{formatted_time}/"
+log_dir = f"logs/{formatted_time}/"
 
 os.makedirs(models_dir, exist_ok=True)
 os.makedirs(log_dir, exist_ok=True)
@@ -118,3 +122,9 @@ except KeyboardInterrupt:
 finally:
     model.save(f"{models_dir}/DQN_Snake_final")
     print("Final model saved")
+    if os.name == 'posix':
+        os.remove("models/new")
+        os.symlink("models/new", models_dir, True)
+    else:
+        shutil.rmtree("models/new", ignore_errors=True)
+        shutil.copytree(models_dir, "models/new")

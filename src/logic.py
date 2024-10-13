@@ -5,8 +5,6 @@ import numpy as np
 import pygame
 import os
 
-from gymnasium.envs.tabular.blackjack import score
-
 snake_head_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_head.png'))
 snake_body_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_body.png'))
 snake_corner_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_corner.png'))
