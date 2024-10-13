@@ -10,24 +10,25 @@ moves = {
     "down": 3
 }
 
-pygame.init()
+if __name__ == "__main__":
+    pygame.init()
 
-env = SnakeEnv(render_mode="human", fps=7)
+    env = SnakeEnv(render_mode="human", fps=7)
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-    keys = pygame.key.get_pressed()
-    if env.alive:
-        if keys[pygame.K_UP]:
-            env.step(2)
-        elif keys[pygame.K_DOWN]:
-            env.step(3)
-        elif keys[pygame.K_LEFT]:
-            env.step(0)
-        elif keys[pygame.K_RIGHT]:
-            env.step(1)
-        else:
-            env.step(moves[env.current_dir])
+        keys = pygame.key.get_pressed()
+        if env.alive:
+            if keys[pygame.K_UP]:
+                env.step(2)
+            elif keys[pygame.K_DOWN]:
+                env.step(3)
+            elif keys[pygame.K_LEFT]:
+                env.step(0)
+            elif keys[pygame.K_RIGHT]:
+                env.step(1)
+            else:
+                env.step(moves[env.current_dir])

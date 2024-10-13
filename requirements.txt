@@ -4,3 +4,6 @@ numpy
 stable_baselines3
 tqdm
 rich
+tensorboard
+tensorflow
+opencv-python
