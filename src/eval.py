@@ -22,8 +22,6 @@ for _ in range(num_episodes):
     action, _ = model.predict(obs, deterministic=True)
     obs, reward, terminated, truncated, info = eval_env.step(action)
 
-    print(reward)
-
     if terminated or truncated:
         obs, _ = eval_env.reset()
 

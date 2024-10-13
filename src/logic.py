@@ -1,4 +1,5 @@
 import random
+import sys
 import gymnasium as gym
 import numpy as np
 import pygame
@@ -90,6 +91,9 @@ class SnakeEnv(gym.Env):
         for i in range(4):
             self.generate_new_food()
 
+    def close(self):
+        sys.exit()
+
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
         self.pos_snake = [self.SnakePart("up", (112, 112), "head"),
@@ -123,7 +127,7 @@ class SnakeEnv(gym.Env):
             self.generate_new_food()
 
     def step(self, action):
-        reward = -0.1
+        reward = 0
         food_eaten = False
         if action == 2 and self.current_dir != "down" and self.current_dir != "up":
             self.current_dir = "up"
@@ -168,6 +172,7 @@ class SnakeEnv(gym.Env):
 
         if not food_eaten:
             self.pos_snake.pop()
+            reward = -0.2
         else:
             reward = 2.0
 
