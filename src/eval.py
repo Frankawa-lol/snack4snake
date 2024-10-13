@@ -2,7 +2,7 @@ from logic import SnakeEnv
 from stable_baselines3 import DQN
 
 
-model = DQN.load("models/DQN_Snake_final.zip")
+model = DQN.load("models/DQN_Snake_final")
 
 
 num_episodes = 400

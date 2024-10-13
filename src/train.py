@@ -1,4 +1,7 @@
 import argparse
+
+from stable_baselines3.common.logger import TensorBoardOutputFormat
+
 from logic import SnakeEnv
 import os
 from datetime import datetime
@@ -35,15 +38,8 @@ def safe_mean(arr):
 # Training
 env = SnakeEnv(render_mode="human" if human else None)
 
-current_time = datetime.now()
-
-# Format datetime for file names
-#formatted_time = current_time.strftime("%Y-%m-%d_%H-%M")
-
-formatted_time = "new"
-
-models_dir = f"models/{formatted_time}/"
-log_dir = f"logs/{formatted_time}/"
+models_dir = f"models/"
+log_dir = f"logs/"
 
 os.makedirs(models_dir, exist_ok=True)
 os.makedirs(log_dir, exist_ok=True)
@@ -51,20 +47,46 @@ os.makedirs(log_dir, exist_ok=True)
 
 class TensorboardCallback(BaseCallback):
     def __init__(self, verbose=0):
-        super(TensorboardCallback, self).__init__(verbose)
+        super().__init__(verbose)
+        self.step_count = 0
 
-    def _on_step(self) -> bool:
-        # Log epsilon (exploration rate)
-        self.logger.record('epsilon', self.model.exploration_rate)
+    def _on_step(self):
+        self.step_count += 1
+        if self.step_count % 1000 == 0:
+            print(f"Step: {self.step_count}")
 
-        # Log Q-values
-        obs = self.training_env.reset()[0]
-        q_values = self.model.q_net(self.model.q_net.obs_to_tensor(obs)[0])
-        self.logger.record('q_values/max', q_values.max().item())
-        self.logger.record('q_values/min', q_values.min().item())
-        self.logger.record('q_values/mean', q_values.mean().item())
+        if self.n_calls % 1000 == 0:
+            self.logger.record("train/steps", self.n_calls)
+            if len(self.model.ep_info_buffer) > 0 and len(self.model.ep_info_buffer[0]) > 0:
+                self.logger.record("rollout/ep_rew_mean",
+                                   safe_mean([ep_info["r"] for ep_info in self.model.ep_info_buffer]))
+                self.logger.record("rollout/ep_len_mean",
+                                   safe_mean([ep_info["l"] for ep_info in self.model.ep_info_buffer]))
+                self.logger.record("rollout/score",
+                                   self.locals['infos'][0]['score'])
+                # Log learning rate
+                self.logger.record("train/learning_rate", self.model.learning_rate)
 
         return True
+
+    def _on_training_start(self):
+        output_formats = self.logger.output_formats
+        self.tb_formatter = next(formatter for formatter in output_formats
+                                 if isinstance(formatter, TensorBoardOutputFormat))
+
+class RewardThresholdCallback(BaseCallback):
+    def __init__(self, threshold=15, verbose=0):
+        super().__init__(verbose)
+        self.threshold = threshold
+
+    def _on_step(self):
+        if self.locals['dones'][0]:  # Check if episode is done
+            episode_reward = self.locals['infos'][0]['score']
+            if episode_reward > self.threshold:
+                print(f"Reward threshold reached! Stopping training.")
+                return False  # Stop training
+        return True  # Continue training
+
 
 model = DQN('MlpPolicy', env,
             learning_rate=LEARNING_RATE,
@@ -83,11 +105,12 @@ model = DQN('MlpPolicy', env,
             verbose=1)
 
 checkpoint_callback = CheckpointCallback(save_freq=1000, save_path=models_dir, name_prefix='dqn_snake')
+threshold_callback = RewardThresholdCallback()
 
 try:
     model.learn(
         total_timesteps=TIMESTEPS,
-        callback=[checkpoint_callback, TensorboardCallback()],
+        callback=[checkpoint_callback, TensorboardCallback(), threshold_callback],
         progress_bar=True
     )
 except KeyboardInterrupt:

@@ -174,7 +174,7 @@ class SnakeEnv(gym.Env):
             self.pos_snake.pop()
             reward = -0.2
         else:
-            reward = 2.0
+            reward = 5.0
 
         if not self.alive:
             reward = -1.0
