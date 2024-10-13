@@ -190,6 +190,7 @@ class SnakeEnv(gym.Env):
                 reward = 0.2
         else:
             reward = 5.0
+        self.food_dis = current_food_distance
 
         for e in self.pos_snake[1:]:
             if self.pos_snake[0] == e:
