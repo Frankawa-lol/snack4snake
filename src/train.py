@@ -1,6 +1,5 @@
 import argparse
 import shutil
-
 from stable_baselines3.common.logger import TensorBoardOutputFormat
 from logic import SnakeEnv
 import os

@@ -11,7 +11,7 @@ parser.add_argument('model_path')
 model_path = parser.parse_args().model_path
 model = DQN.load(model_path)
 
-num_episodes = 400
+num_episodes = 4000
 
 # Ausführung
 eval_env = SnakeEnv(render_mode="human", fps=10)
