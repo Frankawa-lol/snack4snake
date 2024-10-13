@@ -123,18 +123,16 @@ class SnakeEnv(gym.Env):
             self.generate_new_food()
 
     def step(self, action):
-        reward = 0
+        reward = -0.1
         food_eaten = False
-        if action == 2 and self.current_dir != "down":
+        if action == 2 and self.current_dir != "down" and self.current_dir != "up":
             self.current_dir = "up"
-        elif action == 3 and self.current_dir != "up":
+        elif action == 3 and self.current_dir != "up" and self.current_dir != "down":
             self.current_dir = "down"
-        elif action == 0 and self.current_dir != "right":
+        elif action == 0 and self.current_dir != "right" and self.current_dir != "left":
             self.current_dir = "left"
-        elif action == 1 and self.current_dir != "left":
+        elif action == 1 and self.current_dir != "left" and self.current_dir != "right":
             self.current_dir = "right"
-        else:
-            reward += -1
 
         match self.current_dir:
             case "up":
@@ -170,12 +168,11 @@ class SnakeEnv(gym.Env):
 
         if not food_eaten:
             self.pos_snake.pop()
-            reward += -3
         else:
-            reward += 20
+            reward = 2.0
 
         if not self.alive:
-            reward = -1
+            reward = -1.0
 
         if self.render_mode == "human":
             self._render_frame()
@@ -209,11 +206,11 @@ class SnakeEnv(gym.Env):
             snake_pos_list.append(e.position)
         for x in range(16):
             for y in range(16):
-                if (x, y) == snake_pos_list[0]:
+                if (x*16, y*16) == snake_pos_list[0]:
                     field[x][y] = 1
-                elif (x, y) in snake_pos_list[1:]:
+                elif (x*16, y*16) in snake_pos_list[1:]:
                     field[x][y] = 2
-                elif (x, y) in self.pos_food:
+                elif (x*16, y*16) in self.pos_food:
                     field[x][y] = 3
         return [
             x for row in field for x in row

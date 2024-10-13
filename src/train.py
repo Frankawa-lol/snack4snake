@@ -38,7 +38,9 @@ env = SnakeEnv(render_mode="human" if human else None)
 current_time = datetime.now()
 
 # Format datetime for file names
-formatted_time = current_time.strftime("%Y-%m-%d_%H-%M")
+#formatted_time = current_time.strftime("%Y-%m-%d_%H-%M")
+
+formatted_time = "new"
 
 models_dir = f"models/{formatted_time}/"
 log_dir = f"logs/{formatted_time}/"

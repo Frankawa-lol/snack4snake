@@ -12,7 +12,7 @@ model_path = parser.parse_args().model_path
 model = DQN.load(model_path)
 
 
-num_episodes = 100
+num_episodes = 400
 
 # Ausführung
 eval_env = SnakeEnv(render_mode="human", fps=10)
@@ -21,6 +21,8 @@ obs, _ = eval_env.reset()
 for _ in range(num_episodes):
     action, _ = model.predict(obs, deterministic=True)
     obs, reward, terminated, truncated, info = eval_env.step(action)
+
+    print(reward)
 
     if terminated or truncated:
         obs, _ = eval_env.reset()
