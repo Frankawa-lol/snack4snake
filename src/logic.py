@@ -5,6 +5,8 @@ import numpy as np
 import pygame
 import os
 
+from gymnasium.envs.tabular.blackjack import score
+
 snake_head_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_head.png'))
 snake_body_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_body.png'))
 snake_corner_image = pygame.image.load(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sprite', 'snake_corner.png'))
@@ -78,6 +80,7 @@ class SnakeEnv(gym.Env):
         self.current_dir = "up"
         self.fps = fps
         self.render_mode = render_mode
+        self.steps = 0
         if render_mode == "human":
             global screen
             screen = pygame.display.set_mode((256, 256))
@@ -90,9 +93,16 @@ class SnakeEnv(gym.Env):
             self.deathscreen = pygame.font.Font(None, size=50).render("You Died!", True, "black", self.color_item)
         for i in range(4):
             self.generate_new_food()
+        self.food_dis = self.calculate_food_distance()
 
     def close(self):
         sys.exit()
+
+    def calculate_food_distance(self):
+        food_distance = []
+        for e in self.pos_food:
+            food_distance.append(abs(e[0] - self.pos_snake[0].position[0]) + abs(e[1] - self.pos_snake[1].position[1]))
+        return min(food_distance)
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
@@ -103,7 +113,9 @@ class SnakeEnv(gym.Env):
                           self.SnakePart("left", (144, 144), "corner", "down"),
                           self.SnakePart("up", (144, 160), "tail")]
         self.alive = True
+        print((self.score, self.steps))
         self.score = 0
+        self.steps = 0
         self.pos_food = []
         self.current_dir = "up"
 
@@ -128,7 +140,9 @@ class SnakeEnv(gym.Env):
 
     def step(self, action):
         reward = 0
+        self.steps +=1
         food_eaten = False
+        current_food_distance = self.calculate_food_distance()
         if action == 2 and self.current_dir != "down" and self.current_dir != "up":
             self.current_dir = "up"
         elif action == 3 and self.current_dir != "up" and self.current_dir != "down":
@@ -172,9 +186,18 @@ class SnakeEnv(gym.Env):
 
         if not food_eaten:
             self.pos_snake.pop()
-            reward = -0.2
+            if current_food_distance >= self.food_dis:
+                reward = -0.2
+            else:
+                reward = 0.2
         else:
             reward = 5.0
+
+        for e in self.pos_snake[1:]:
+            if self.pos_snake[0] == e:
+                self.alive = False
+                print("die!!")
+
 
         if not self.alive:
             reward = -1.0
@@ -241,9 +264,6 @@ class SnakeEnv(gym.Env):
                 e.draw()
                 if self.pos_snake.index(e) == 0:
                     continue
-
-            if self.pos_snake[0] in self.pos_snake[1:]:
-                self.alive = False
         else:
             screen.fill(self.color_item)
             screen.blit(self.deathscreen, (128 - 79, 128 - 17))
