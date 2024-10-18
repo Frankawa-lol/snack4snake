@@ -241,11 +241,11 @@ class SnakeEnv(gym.Env):
         for x in range(self.field_size[0]):
             for y in range(self.field_size[1]):
                 if (x, y) == snake_pos_list[0]:
-                    field[x][y] = 1
+                    field[y][x] = 1
                 elif (x, y) in snake_pos_list[1:]:
-                    field[x][y] = 2
+                    field[y][x] = 2
                 elif (x, y) in self.pos_food:
-                    field[x][y] = 3
+                    field[y][x] = 3
         return [
             x for row in field for x in row
         ]
