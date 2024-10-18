@@ -13,7 +13,8 @@ parser = argparse.ArgumentParser(
                     description='Train snack4snake AI models')
 parser.add_argument('-r', '--render', action='store_true')
 
-human = parser.parse_args().render
+#human = parser.parse_args().render
+human = True
 
 TIMESTEPS = 100_000
 LEARNING_RATE = 1e-4
@@ -30,12 +31,13 @@ tau = 1.0
 TRAIN_FREQ = 4
 GRADIENT_STEPS = 1
 
+field_size = (32, 16)
 
 def safe_mean(arr):
     return np.nan if len(arr) == 0 else np.mean(arr)
 
 # Training
-env = SnakeEnv(render_mode="human" if human else None)
+env = SnakeEnv(render_mode="human" if human else None, field_size= field_size)
 
 current_time = datetime.now()
 # Format datetime for file names
